@@ -45,9 +45,6 @@ int main(int argc, char **argv) {
     write(players[i], buffer, sizeof(buffer));
     snprintf(buffer, sizeof(buffer), "You are player #%d. Your token is %s", i, color[i]);
     write(players[i], buffer, sizeof(buffer));
-    memset(buffer, 0, BUFFER_SIZE);
-    snprintf(buffer, sizeof(buffer), "%d", i);
-    write(players[i], buffer, sizeof(buffer));
   }
 
   memset(buffer, 0, BUFFER_SIZE);
@@ -63,18 +60,37 @@ int main(int argc, char **argv) {
         position[i] += num_rolled;
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "Player %d has rolled a %d moving to position %d", i, num_rolled, position[i]);
-        for (j = 0; j < num_players; j++)
-          if (j != i)
-            write(players[j], buffer, sizeof(buffer));
+        for (j = 0; j < num_players; j++){
+          if (j != i) {
+             write(players[j], buffer, sizeof(buffer));
+           }
+        }
+        memset(buffer, 0, BUFFER_SIZE);
+        sprintf(buffer, "%d", num_players);
+        for (j = 0; j < num_players; j++){
+          if (j != i) {
+             write(players[j], buffer, sizeof(buffer));
+           }
+        }
+        memset(buffer, 0, BUFFER_SIZE);
+        sprintf(buffer + strlen(buffer), "%d ", position[0]);
+        for (int k = 1; k < num_players;k++){
+          sprintf(buffer + strlen(buffer), " %d", position[k]);
+        }
+        for (j = 0; j < num_players; j++){
+          if (j != i) {
+             write(players[j], buffer, sizeof(buffer));
+           }
+        }
         turns[i] -=1;
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "%d", i);
         write(players[i], buffer, sizeof(buffer));
-
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "%s", color[i]);
-        write(players[i], buffer, sizeof(buffer));
 
+        // ----------
+        write(players[i], buffer, sizeof(buffer));
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "%d", num_players);
         for (j = 0; j < num_players;j++){

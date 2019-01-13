@@ -19,6 +19,14 @@ int check_position(int pos, int location[] , int len){
   return player;
 }
 
+int rollDice() {
+	//return LOWER_LIMIT + rand() % UPPER_LIMIT
+    int num = 1 + abs(rand()) % 6;
+    if(num < 0 || num > 6) return 1 + num % 6;
+    else return num;
+
+}
+
 void print_board(int location[], int num){
   int a[10][10];
   int i,j,k;
