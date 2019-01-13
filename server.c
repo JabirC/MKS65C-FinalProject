@@ -40,7 +40,9 @@ int main(int argc, char **argv) {
 
 
   //setup players
-  char color[4][10] = {"red" , "blue", "green", "yellow"};
+  char color[4][10] = {"magenta" , "blue", "green", "yellow"};
+  int snake_heads[4] = {97, 39, 67, 51};
+  int snake_tails[4] = {58, 17, 45, 28};
   for (i = 0; i < num_players; i++) {
     write(players[i], buffer, sizeof(buffer));
     snprintf(buffer, sizeof(buffer), "You are player #%d. Your token is %s", i, color[i]);
@@ -58,8 +60,13 @@ int main(int argc, char **argv) {
         read(players[i], buffer, sizeof(buffer));
         num_rolled = atoi(buffer);
         position[i] += num_rolled;
+        int is_snake = find_index(snake_heads, 4, position[i]);
         memset(buffer, 0, BUFFER_SIZE);
-        sprintf(buffer, "Player %d has rolled a %d moving to position %d", i, num_rolled, position[i]);
+        if(is_snake != -1){
+          sprintf(buffer, "Player %d has rolled a %d moving to a snake at %d, goes back to %d", i, num_rolled, position[i], snake_tails[is_snake]);
+          position[i] = snake_tails[is_snake];
+        }
+        else sprintf(buffer, "Player %d has rolled a %d moving to position %d", i, num_rolled, position[i]);
         for (j = 0; j < num_players; j++){
           if (j != i) {
              write(players[j], buffer, sizeof(buffer));

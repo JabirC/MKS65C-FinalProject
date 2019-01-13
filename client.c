@@ -106,9 +106,17 @@ int main(int argc, char **argv) {
       pos[i - 1] = atoi(array[i]);
       i++;
     }
+    int is_snake_ladder = 0;
+    int temp = position + rolled;
+    if(position > pos[player]) {
+      is_snake_ladder = 1;
+    }
+    else if((position - pos[player]) > 6 ) is_snake_ladder = 2;
     position = pos[player];
     printf("Player %d: %s %s %s Position: %d\n", player, player_token(player), color, "\x1B[0m", position );
-    printf("You rolled a %d moving to %d.\n", rolled, pos[player]);
+    if(is_snake_ladder == 1) printf("You rolled a %d moving to a snake at %d, went back to %d.\n", rolled, temp, pos[player]);
+    else if(is_snake_ladder == 2) printf("You rolled a %d moving to a ladder at %d, skipped to %d.\n", rolled, temp, pos[player]);
+    else printf("You rolled a %d moving to %d.\n", rolled, pos[player]);
     print_board(pos, players_ingame);
    }
 }
