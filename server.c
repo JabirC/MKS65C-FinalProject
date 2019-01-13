@@ -20,7 +20,6 @@ int main(int argc, char **argv) {
   int listen_socket, i = 0, j;
   int players[num_players], subservers[num_players], turns[num_players], position[num_players];
   memset(position,0, sizeof(position));
-
   listen_socket = server_setup();
 
   while (i < num_players) {
@@ -40,9 +39,11 @@ int main(int argc, char **argv) {
 
 
   //setup players
-  char color[4][10] = {"magenta" , "blue", "green", "yellow"};
+  char color[4][10] = {"magenta" , "red", "green", "yellow"};
   int snake_heads[4] = {97, 39, 67, 51};
   int snake_tails[4] = {58, 17, 45, 28};
+  int ladder_bot[4] = {41 , 57, 7, 68};
+  int ladder_top[4] = {61, 87, 25, 90};
   for (i = 0; i < num_players; i++) {
     write(players[i], buffer, sizeof(buffer));
     snprintf(buffer, sizeof(buffer), "You are player #%d. Your token is %s", i, color[i]);
@@ -59,14 +60,38 @@ int main(int argc, char **argv) {
         write(players[i], ACK, sizeof(ACK));
         read(players[i], buffer, sizeof(buffer));
         num_rolled = atoi(buffer);
+        if(num_rolled==6)turns[i]++;
+        printf("%d\n",position[i] );
         position[i] += num_rolled;
-        int is_snake = find_index(snake_heads, 4, position[i]);
-        memset(buffer, 0, BUFFER_SIZE);
-        if(is_snake != -1){
-          sprintf(buffer, "Player %d has rolled a %d moving to a snake at %d, goes back to %d", i, num_rolled, position[i], snake_tails[is_snake]);
-          position[i] = snake_tails[is_snake];
+        printf("%d\n",position[i] );
+        int wrap = 0;
+        if(position[i] > 100){
+          wrap = position[i] - 100;
+          printf("%d\n",wrap );
+          position[i] = 100 - wrap;
+          printf("%d\n",position[i] );
         }
-        else sprintf(buffer, "Player %d has rolled a %d moving to position %d", i, num_rolled, position[i]);
+        int is_snake = find_index(snake_heads, 4, position[i]);
+        int is_ladder = find_index(ladder_bot, 4, position[i]);
+        memset(buffer, 0, BUFFER_SIZE);
+        if(wrap){
+          if(is_snake != -1){
+            sprintf(buffer, "Player %d has rolled a %d passing 100, wraps around to a snake at %d, goes back to %d", i, num_rolled, position[i], snake_tails[is_snake]);
+            position[i] = snake_tails[is_snake];
+          }
+          else sprintf(buffer, "Player %d has rolled a %d passing 100, wraps around to position %d", i, num_rolled, position[i]);
+        }
+        else{
+          if(is_snake != -1){
+            sprintf(buffer, "Player %d has rolled a %d moving to a snake at %d, goes back to %d", i, num_rolled, position[i], snake_tails[is_snake]);
+            position[i] = snake_tails[is_snake];
+          }
+          else if(is_ladder != -1){
+            sprintf(buffer, "Player %d has rolled a %d moving to a ladder at %d, skips to %d", i, num_rolled, position[i], ladder_top[is_ladder]);
+            position[i] = ladder_top[is_ladder];
+          }
+          else sprintf(buffer, "Player %d has rolled a %d moving to position %d", i, num_rolled, position[i]);
+        }
         for (j = 0; j < num_players; j++){
           if (j != i) {
              write(players[j], buffer, sizeof(buffer));
@@ -104,7 +129,12 @@ int main(int argc, char **argv) {
           sprintf(buffer + strlen(buffer), " %d", position[j]);
         }
         write(players[i], buffer, sizeof(buffer));
-      }
+        int win = find_index(position, num_players, 100);
+        if(win != -1){
+           printf("PLAYER %d HAS WON THE GAME. SERVER IS SHUTTING DOWN.\n", win );
+           exit(0);
+        }
+       }
     }
   }
 }

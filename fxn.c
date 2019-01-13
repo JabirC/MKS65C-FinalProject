@@ -2,8 +2,8 @@
 
 
 char * player_token(int player_num){
-  if(player_num == 0) return "\x1B[35m";  //red
-  else if (player_num == 1) return "\x1B[34m";//blue
+  if(player_num == 0) return "\x1B[35m";  //magenta
+  else if (player_num == 1) return "\x1B[31m";//red
   else if (player_num == 2) return "\x1B[32m";//green
   else if (player_num == 3) return "\x1B[33m"; //yellow
 }
@@ -87,8 +87,6 @@ int check_snakes_horizontal(int i, int k){
 int check_partial_horizontal(int i, int k){
   if(i == 0 && k == 4) return 1;
   else if(i == 1 && k == 4) return 1;
-  else if(i == 2 && k == 4) return 1;
-  else if(i == 3 && k == 3) return 1;
   else if(i == 4 && k == 3) return 1;
   else if(i == 5 && k == 2) return 1;
   else if(i == 6 && k == 4) return 1;
@@ -102,10 +100,68 @@ int check_partial_horizontal(int i, int k){
   else if(i == 2 && k == 7) return 1;
   return 0;
 }
+int check_partial_Ladders(int i, int k){
+  if(i == 3 && k == 1) return 1;
+  else if(i == 4 && k == 1) return 1;
+  else if(i == 7 && k == 6) return 1;
+  else if(i == 8 && k == 7) return 1;
+  else if(i == 6 && k == 5) return 1;
+  return 0;
+}
 
 int check_vertical_ends(int i){
   if(i == 5) return 1;
   else if(i == 4) return 1;
+  return 0;
+}
+
+int check_ladders_horizontal(int i , int k){
+  if(i ==8 && k == 6)return 1;
+  else if(i ==8 && k == 5)return 1;
+  else if(i ==7 && k == 5)return 1;
+  else if(i ==7 && k == 4)return 1;
+  else if(i ==6 && k == 4)return 1;
+  else if(i ==2 && k == 8)return 1;
+  else if(i ==1 && k == 8)return 1;
+  else if(i ==1 && k == 9)return 1;
+  else if(i ==3 && k == 0)return 1;
+  else if(i ==4 && k == 0)return 1;
+  else if(i ==3 && k == 3)return 1;
+  else if(i ==3 && k == 4)return 1;
+  else if(i ==2 && k == 4)return 1;
+  else if(i ==2 && k == 5)return 1;
+  else if(i ==1 && k == 5)return 1;
+  else if(i ==1 && k == 6)return 1;
+  return 0;
+}
+int check_ladders_vertical(int i , int j){
+  if(i ==3 && j == 8)return 1;
+  else if(i ==8 && j == 6)return 1;
+  else if(i ==8 && j == 5)return 1;
+  else if(i ==7 && j == 5)return 1;
+  else if(i ==2 && j == 8)return 1;
+  else if(i ==2 && j == 9)return 1;
+  else if(i ==1 && j == 9)return 1;
+  else if(i ==5 && j == 0)return 1;
+  else if(i ==5 && j == 1)return 1;
+  else if(i ==4 && j == 0)return 1;
+  else if(i ==4 && j == 1)return 1;
+  else if(i ==3 && j == 0)return 1;
+  else if(i ==3 && j == 1)return 1;
+  else if(i == 4 && j == 4) return 1;
+  else if(i == 3 && j == 4) return 1;
+  else if(i == 3 && j == 5) return 1;
+  else if(i == 2 && j == 5) return 1;
+  else if(i == 2 && j == 6) return 1;
+  else if(i == 1 && j == 6) return 1;
+  return 0;
+}
+
+int check_both(int i, int k){
+  if(i == 2 && k == 7) return 1;
+  else if(i == 7 && k == 4) return 1;
+  else if(i == 2 && k == 4) return 1;
+  else if(i == 3 && k == 3) return 1;
   return 0;
 }
 
@@ -173,9 +229,13 @@ void print_board(int location[], int num){
            }
            else if(i == 9){
              if(j == 9){
-              printf("|   ");
-              printf("%s" "%d " "\x1B[0m" ,player_token(player_here), a[i][j]);
-            }
+              printf("|  ");
+              printf("%s" "%d  " "\x1B[0m" ,player_token(player_here), a[i][j]);
+             }
+             else if(j == 6){
+              printf("\x1B[34m""|   ""\x1B[0m");
+              printf("%s" "%d  " "\x1B[0m" ,player_token(player_here), a[i][j]);
+             }
              else {
               printf("|   ");
               printf("%s" "%d  " "\x1B[0m" ,player_token(player_here), a[i][j]);
@@ -183,6 +243,10 @@ void print_board(int location[], int num){
            }
            else if(check_snakes_vertical(i, j)){
              printf("\x1B[1;31m""|  " "\x1B[0m");
+             printf("%s" "%d  " "\x1B[0m" ,player_token(player_here),a[i][j]);
+           }
+           else if(check_ladders_vertical(i , j)){
+             printf("\x1B[34m""|  " "\x1B[0m");
              printf("%s" "%d  " "\x1B[0m" ,player_token(player_here),a[i][j]);
            }
            else {
@@ -195,10 +259,16 @@ void print_board(int location[], int num){
             printf( "|  *   ");
           }
           else if(i == 9){
-            if(j == 9) printf("|   %d " ,a[i][j]);
+            if(j == 9) printf("|  %d  " ,a[i][j]);
+            else if(j == 6){
+             printf("\x1B[34m""|%s   %d  " ,"\x1B[0m",a[i][j]);
+            }
             else printf("|   %d  " ,a[i][j]);
           }
           else if(check_snakes_vertical(i,j)) printf( "%s|%s  %d  " ,"\x1B[1;31m","\x1B[0m", a[i][j]);
+          else if(check_ladders_vertical(i , j)){
+            printf( "%s|%s  %d  " ,"\x1B[34m","\x1B[0m", a[i][j]);
+          }
           else printf( "|  %d  " ,a[i][j]);
         }
       }
@@ -207,11 +277,20 @@ void print_board(int location[], int num){
       }
       else printf("|\n");
       for(k=0;k<10;k++){
-        if(check_snakes_horizontal(i, k)){
+        if(check_both(i, k)){
+          printf("%s+%s%s------%s", "\x1B[1;31m", "\x1B[0m", "\x1B[34m", "\x1B[0m");
+        }
+        else if(check_snakes_horizontal(i, k)){
           printf("\x1B[1;31m" "+------" "\x1B[0m");
         }
         else if(check_partial_horizontal(i, k)){
            printf("%s+%s------", "\x1B[1;31m", "\x1B[0m");
+        }
+        else if(check_ladders_horizontal(i, k)){
+           printf("%s+------%s", "\x1B[34m", "\x1B[0m");
+        }
+        else if(check_partial_Ladders(i, k)){
+           printf("%s+%s------", "\x1B[34m", "\x1B[0m");
         }
         else printf("+------");
       }
@@ -219,14 +298,3 @@ void print_board(int location[], int num){
       else printf("+\n");
   }
 }
-
-
-// int main(int argc, char **argv){
-//   int loc[4];
-//   loc[0] = 55;
-//   loc[1] = 3;
-//   loc[2] = 5;
-//   loc[3] = 88;
-//   print_board(loc , 4);
-//   return 0;
-// }

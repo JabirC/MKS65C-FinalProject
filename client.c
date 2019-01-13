@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
   int server_socket;
   char buffer[BUFFER_SIZE];
-  srand(time(NULL));
+  srand(getpid());
   int rolled = 0;
   int player = -1;
   char color[10] = "";
@@ -53,6 +53,11 @@ int main(int argc, char **argv) {
             a++;
           }
           print_board(temp_pos, player_len);
+          int temp_win = find_index(temp_pos, player_len, 100);
+          if(temp_win != -1){
+            printf(":( PLAYER %d HAS WON THE GAME, BETTER LUCK NEXT TIME!\n", temp_win);
+            exit(0);
+          }
           memset(buffer, 0, BUFFER_SIZE);
         }
         else{
@@ -106,17 +111,30 @@ int main(int argc, char **argv) {
       pos[i - 1] = atoi(array[i]);
       i++;
     }
+    int win = find_index(pos, players_ingame, 100);
     int is_snake_ladder = 0;
     int temp = position + rolled;
-    if(position > pos[player]) {
+    if((position - pos[player]) > 6) {
       is_snake_ladder = 1;
     }
-    else if((position - pos[player]) > 6 ) is_snake_ladder = 2;
+    else if((pos[player] - position) > 6 ) is_snake_ladder = 2;
+    int wrap = position + rolled;
     position = pos[player];
     printf("Player %d: %s %s %s Position: %d\n", player, player_token(player), color, "\x1B[0m", position );
-    if(is_snake_ladder == 1) printf("You rolled a %d moving to a snake at %d, went back to %d.\n", rolled, temp, pos[player]);
-    else if(is_snake_ladder == 2) printf("You rolled a %d moving to a ladder at %d, skipped to %d.\n", rolled, temp, pos[player]);
-    else printf("You rolled a %d moving to %d.\n", rolled, pos[player]);
+    if(wrap > 100){
+        if(is_snake_ladder == 1) printf("You rolled a %d moving past 100, wrapped around to a snake at %d, went back to %d.\n", rolled, temp, pos[player]);
+      else printf("You rolled a %d moving past 100, wrapped around to %d.\n", rolled, pos[player]);
+    }
+    else{
+      if(is_snake_ladder == 1) printf("You rolled a %d moving to a snake at %d, went back to %d.\n", rolled, temp, pos[player]);
+      else if(is_snake_ladder == 2) printf("You rolled a %d moving to a ladder at %d, skipped to %d.\n", rolled, temp, pos[player]);
+      else printf("You rolled a %d moving to %d.\n", rolled, pos[player]);
+    }
     print_board(pos, players_ingame);
+    if(win == player){
+      printf("CONGRATULATIONS! YOU WON THE GAME.\n");
+      exit(0);
+    }
+    if(rolled ==6)printf("You rolled a 6, roll again.\n");
    }
 }
