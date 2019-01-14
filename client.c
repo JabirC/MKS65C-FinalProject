@@ -9,14 +9,22 @@ int check_buffer(char * buffer){
 }
 
 
-int main(int argc, char **argv) {
+static void sighandler(int signo){
+  if(signo == SIGINT){
+    printf("\nExiting game...\n");
+    exit(0);
+  }
+}
 
+int main(int argc, char **argv) {
+  signal(SIGINT, sighandler);
   int server_socket;
   char buffer[BUFFER_SIZE];
   srand(time(NULL));
   int rolled = 0;
   int player = -1;
   char color[10] = "";
+  int prev_turn = 0;
   int turn = 0;
   int position= 0;
 
@@ -39,7 +47,6 @@ int main(int argc, char **argv) {
   printf("\nWelcome to Snakes and Ladders!\nYour goal is to make it to the 100th box before the other players. Type 'roll' to roll the dice when it is your turn. The number of spaces you move forward depends on the number you roll. If you roll a 6 you get to roll again.\n\n");
   memset(buffer, 0, BUFFER_SIZE);
   while (1) {
-    printf("Waiting for your turn.\n");
     while (read(server_socket, buffer, sizeof(buffer))) {
       if (strcmp(buffer, ACK)) {
         if (strlen(buffer) == 1){
@@ -68,6 +75,7 @@ int main(int argc, char **argv) {
             exit(0);
           }
           memset(buffer, 0, BUFFER_SIZE);
+          printf("Waiting for your turn.\n");
         }
         else{
           system("clear");
@@ -82,6 +90,10 @@ int main(int argc, char **argv) {
         turn++;
         break;
       }
+    }
+    if(prev_turn == turn){
+      printf("Server connection lost, Exiting\n");
+      exit(0);
     }
     while(check_buffer(buffer)){
       printf("Type 'roll' to roll the die: ");
@@ -145,5 +157,7 @@ int main(int argc, char **argv) {
       exit(0);
     }
     if(rolled ==6)printf("You rolled a 6, roll again.\n");
+    prev_turn = turn;
+    printf("Waiting for your turn.\n");
    }
 }

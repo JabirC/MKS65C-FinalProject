@@ -2,7 +2,15 @@
 #include "fxn.c"
 
 
+static void sighandler(int signo){
+  if(signo == SIGINT){
+    printf("Server is exiting...\n");
+    exit(0);
+  }
+}
+
 int main(int argc, char **argv) {
+  signal(SIGINT, sighandler);
   int num_players = 0;
   char pass[BUFFER_SIZE] = "";
   char buffer[BUFFER_SIZE];
@@ -47,7 +55,7 @@ int main(int argc, char **argv) {
     sprintf(buffer, "%d", 1);
     write(players[i], buffer, sizeof(buffer));
     memset(buffer, 0, BUFFER_SIZE);
-    
+
     turns[i] = 0;
     subservers[i] = fork();
     if (!subservers[i]) {
@@ -81,7 +89,10 @@ int main(int argc, char **argv) {
       turns[i] += 1;
       while (turns[i]) {
         write(players[i], ACK, sizeof(ACK));
-        read(players[i], buffer, sizeof(buffer));
+        if(read(players[i], buffer, sizeof(buffer)) == 0){
+          printf("Player %d is no longer in the game\n", i);
+          exit(0);
+        }
         num_rolled = atoi(buffer);
         if(num_rolled==6)turns[i]++;
         position[i] += num_rolled;
@@ -113,14 +124,18 @@ int main(int argc, char **argv) {
         }
         for (j = 0; j < num_players; j++){
           if (j != i) {
-             write(players[j], buffer, sizeof(buffer));
+             if(write(players[j], buffer, sizeof(buffer)) == 0){
+                printf("A player has left the game, server sutting down...\n");
+             }
            }
         }
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "%d", num_players);
         for (j = 0; j < num_players; j++){
           if (j != i) {
-             write(players[j], buffer, sizeof(buffer));
+            if(write(players[j], buffer, sizeof(buffer)) == 0){
+               printf("A player has left the game, server sutting down...\n");
+            }
            }
         }
         memset(buffer, 0, BUFFER_SIZE);
@@ -130,7 +145,9 @@ int main(int argc, char **argv) {
         }
         for (j = 0; j < num_players; j++){
           if (j != i) {
-             write(players[j], buffer, sizeof(buffer));
+            if(write(players[j], buffer, sizeof(buffer)) == 0){
+               printf("A player has left the game, server sutting down...\n");
+            }
            }
         }
         turns[i] -=1;
