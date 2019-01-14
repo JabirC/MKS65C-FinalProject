@@ -1,12 +1,6 @@
 #include "header.h"
 
 
-char * player_token(int player_num){
-  if(player_num == 0) return "\x1B[35m";  //magenta
-  else if (player_num == 1) return "\x1B[31m";//red
-  else if (player_num == 2) return "\x1B[32m";//green
-  else if (player_num == 3) return "\x1B[33m"; //yellow
-}
 
 int check_snakes_vertical(int i, int j){
   if(i == 3 && j == 7) return 1;
