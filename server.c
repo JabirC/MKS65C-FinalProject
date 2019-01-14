@@ -4,7 +4,8 @@
 
 int main(int argc, char **argv) {
   int num_players = 0;
-
+  char pass[BUFFER_SIZE] = "";
+  char buffer[BUFFER_SIZE];
   if (argc < 2) {
     printf("Invalid arguments.\n");
     exit(1);
@@ -15,6 +16,16 @@ int main(int argc, char **argv) {
       printf("You can only choose 2 to 4 people inclusive!\n");
       exit(1);
     }
+    while(1){
+      printf("What do you want the password to be? : ");
+      fgets(pass, sizeof(pass), stdin);
+      *strchr(pass, '\n') = 0;
+      if (strlen(pass) == 0 || strlen(pass) > 20){
+        printf("Password has to be atleast 1 and atmost 20 characters long.\n");
+        memset(pass, 0, 22);
+      }
+      else break;
+    }
   }
 
   int listen_socket, i = 0, j;
@@ -24,6 +35,19 @@ int main(int argc, char **argv) {
 
   while (i < num_players) {
     players[i] = server_connect(listen_socket);
+    read(players[i], buffer, sizeof(buffer));
+    if(strcmp(buffer, pass)){
+      memset(buffer, 0, BUFFER_SIZE);
+      sprintf(buffer, "%d", 0);
+      write(players[i], buffer, sizeof(buffer));
+      close(players[i]);
+      continue;
+    }
+    memset(buffer, 0, BUFFER_SIZE);
+    sprintf(buffer, "%d", 1);
+    write(players[i], buffer, sizeof(buffer));
+    memset(buffer, 0, BUFFER_SIZE);
+    
     turns[i] = 0;
     subservers[i] = fork();
     if (!subservers[i]) {
@@ -34,7 +58,6 @@ int main(int argc, char **argv) {
   }
   printf("Server is no longer accepting players.\n");
   shutdown(listen_socket, SHUT_RD);
-  char buffer[BUFFER_SIZE];
 
 
 
@@ -61,15 +84,11 @@ int main(int argc, char **argv) {
         read(players[i], buffer, sizeof(buffer));
         num_rolled = atoi(buffer);
         if(num_rolled==6)turns[i]++;
-        printf("%d\n",position[i] );
         position[i] += num_rolled;
-        printf("%d\n",position[i] );
         int wrap = 0;
         if(position[i] > 100){
           wrap = position[i] - 100;
-          printf("%d\n",wrap );
           position[i] = 100 - wrap;
-          printf("%d\n",position[i] );
         }
         int is_snake = find_index(snake_heads, 4, position[i]);
         int is_ladder = find_index(ladder_bot, 4, position[i]);

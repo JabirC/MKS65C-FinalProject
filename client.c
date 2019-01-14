@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
   int server_socket;
   char buffer[BUFFER_SIZE];
-  srand(getpid());
+  srand(time(NULL));
   int rolled = 0;
   int player = -1;
   char color[10] = "";
@@ -24,11 +24,20 @@ int main(int argc, char **argv) {
     server_socket = client_setup( argv[1]);
   else
     server_socket = client_setup( TEST_IP );
-  printf("Waiting for all players to connect.\n");
+  printf("Enter the password: ");
+  fgets(buffer, sizeof(buffer), stdin);
+  *strchr(buffer, '\n') = 0;
+  write(server_socket, buffer, sizeof(buffer));
+  memset(buffer, 0, BUFFER_SIZE);
   read(server_socket, buffer, sizeof(buffer));
-
+  if(!atoi(buffer)){
+    printf("Wrong Password\n");
+    exit(0);
+  }
   system("clear");
+  printf("\nWaiting for all players to connect.\n");
   printf("\nWelcome to Snakes and Ladders!\nYour goal is to make it to the 100th box before the other players. Type 'roll' to roll the dice when it is your turn. The number of spaces you move forward depends on the number you roll. If you roll a 6 you get to roll again.\n\n");
+  memset(buffer, 0, BUFFER_SIZE);
   while (1) {
     printf("Waiting for your turn.\n");
     while (read(server_socket, buffer, sizeof(buffer))) {
