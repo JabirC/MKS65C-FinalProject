@@ -2,7 +2,7 @@
 Jabir Chowdhury and Hasif Ahmed 
 
 ## Rules
-The core part of our final project is centered around the centuries old board game, snakes and ladders. We incorparate the same rules as 
+The core part of our final project is a networking program centered around the centuries old board game, snakes and ladders. We incorparate the same rules as 
 the actual board game does: 
 1. Rolling a 6 means you can roll again
 2. You win by reaching position 100
