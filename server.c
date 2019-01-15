@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
 
   //setup players
-  char color[4][10] = {"magenta" , "red", "green", "yellow"};
+  char color[4][10] = {"blue" , "red", "green", "yellow"};
   int snake_heads[4] = {97, 39, 67, 51};
   int snake_tails[4] = {58, 17, 45, 28};
   int ladder_bot[4] = {41 , 57, 7, 68};
