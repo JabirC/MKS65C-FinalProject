@@ -13,7 +13,7 @@ the actual board game does:
 When starting up the project in the terminal:
 1. Enter hostname -I in the terminal where you will host the server (an ip address should be returned by the terminal)
 2. Enter **./server n** (n being a number between 2 and 4 indicating how many players there will be)
-3. Enter a password that you will not forget
+3. Enter a password that you will not forget \n
 Once the server is set up, for a client to connect:
 1. Enter in terminal **./client ip-addresss** (The ip address is that of the server -- the one that was printed by hostname -I )
 2. Have fun!
