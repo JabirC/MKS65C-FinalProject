@@ -2,7 +2,7 @@
 
 
 char * player_token(int player_num){
-  if(player_num == 0) return "\x1B[1;34m";  //magenta
+  if(player_num == 0) return "\x1B[34m";  //blue
   else if (player_num == 1) return "\x1B[31m";//red
   else if (player_num == 2) return "\x1B[32m";//green
   else if (player_num == 3) return "\x1B[33m"; //yellow
