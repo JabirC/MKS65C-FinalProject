@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
   int prev_turn = 0;
   int turn = 0;
   int position= 0;
+  int special_case = 0;
 
   if (argc == 2)
     server_socket = client_setup( argv[1]);
@@ -47,49 +48,56 @@ int main(int argc, char **argv) {
   printf("\nWelcome to Snakes and Ladders!\nYour goal is to make it to the 100th box before the other players. Type 'roll' to roll the dice when it is your turn. The number of spaces you move forward depends on the number you roll. If you roll a 6 you get to roll again.\n\n");
   memset(buffer, 0, BUFFER_SIZE);
   while (1) {
-    while (read(server_socket, buffer, sizeof(buffer))) {
-      if (strcmp(buffer, ACK)) {
-        if (strlen(buffer) == 1){
-          int player_len = atoi(buffer);
-          int temp_pos[player_len];
+    if(!special_case){
+          while (read(server_socket, buffer, sizeof(buffer))) {
+            if(strlen(buffer) == 0) continue;
+            else if (strcmp(buffer, ACK)) {
+              if (strlen(buffer) == 1){
+                int player_len = atoi(buffer);
+                int temp_pos[player_len];
 
-          memset(buffer, 0, BUFFER_SIZE);
-          read(server_socket, buffer, sizeof(buffer));
-          int a =0;
-          char *z = strtok (buffer, " ");
-          char *arr[10];
-          while (z != NULL)
-          {
-              arr[a++] = z;
-              z = strtok (NULL, " ");
+                memset(buffer, 0, BUFFER_SIZE);
+                read(server_socket, buffer, sizeof(buffer));
+                int a =0;
+                char *z = strtok (buffer, " ");
+                char *arr[10];
+                while (z != NULL)
+                {
+                    arr[a++] = z;
+                    z = strtok (NULL, " ");
+                }
+                a = 0;
+                while(a < player_len){
+                  temp_pos[a] = atoi(arr[a]);
+                  a++;
+                }
+                print_board(temp_pos, player_len);
+                int temp_win = find_index(temp_pos, player_len, 100);
+                if(temp_win != -1){
+                  printf(":( PLAYER %d HAS WON THE GAME, BETTER LUCK NEXT TIME!\n", temp_win);
+                  exit(0);
+                }
+                memset(buffer, 0, BUFFER_SIZE);
+                printf("Waiting for your turn.\n");
+              }
+              else{
+                system("clear");
+                if(turn){
+                  printf("Player %d: %s %s %s Position: %d\n", player, player_token(player), color, "\x1B[0m", position );
+                }
+                printf("received: [%s]\n", buffer);
+                memset(buffer, 0, BUFFER_SIZE);
+              }
+            }
+            else {
+              turn++;
+              break;
+            }
           }
-          a = 0;
-          while(a < player_len){
-            temp_pos[a] = atoi(arr[a]);
-            a++;
-          }
-          print_board(temp_pos, player_len);
-          int temp_win = find_index(temp_pos, player_len, 100);
-          if(temp_win != -1){
-            printf(":( PLAYER %d HAS WON THE GAME, BETTER LUCK NEXT TIME!\n", temp_win);
-            exit(0);
-          }
-          memset(buffer, 0, BUFFER_SIZE);
-          printf("Waiting for your turn.\n");
         }
-        else{
-          system("clear");
-          if(turn){
-            printf("Player %d: %s %s %s Position: %d\n", player, player_token(player), color, "\x1B[0m", position );
-          }
-          printf("received: [%s]\n", buffer);
-          memset(buffer, 0, BUFFER_SIZE);
-        }
-      }
-      else {
-        turn++;
-        break;
-      }
+    if (special_case == 1){
+      turn++;
+      special_case = 0;
     }
     if(prev_turn == turn){
       printf("Server connection lost, Exiting\n");
@@ -127,37 +135,43 @@ int main(int argc, char **argv) {
     }
     int players_ingame = atoi(array[0]);
     int pos[players_ingame];
+    for(int e = 0; e < players_ingame; e++){
+      pos[e] = 0;
+    }
     i = 1;
     while(i <= players_ingame){
       pos[i - 1] = atoi(array[i]);
       i++;
     }
     int win = find_index(pos, players_ingame, 100);
-    int is_snake_ladder = 0;
-    int temp = position + rolled;
-    if((position - pos[player]) > 6) {
-      is_snake_ladder = 1;
-    }
-    else if((pos[player] - position) > 6 ) is_snake_ladder = 2;
-    int wrap = position + rolled;
     position = pos[player];
+
     printf("Player %d: %s %s %s Position: %d\n", player, player_token(player), color, "\x1B[0m", position );
-    if(wrap > 100){
-        if(is_snake_ladder == 1) printf("You rolled a %d moving past 100, wrapped around to a snake at %d, went back to %d.\n", rolled, temp, pos[player]);
-      else printf("You rolled a %d moving past 100, wrapped around to %d.\n", rolled, pos[player]);
-    }
-    else{
-      if(is_snake_ladder == 1) printf("You rolled a %d moving to a snake at %d, went back to %d.\n", rolled, temp, pos[player]);
-      else if(is_snake_ladder == 2) printf("You rolled a %d moving to a ladder at %d, skipped to %d.\n", rolled, temp, pos[player]);
-      else printf("You rolled a %d moving to %d.\n", rolled, pos[player]);
-    }
+    memset(buffer, 0, BUFFER_SIZE);
+    read(server_socket, buffer, sizeof(buffer));
+    printf("%s\n", buffer);
+    memset(buffer, 0, BUFFER_SIZE);
+
     print_board(pos, players_ingame);
     if(win == player){
       printf("CONGRATULATIONS! YOU WON THE GAME.\n");
       exit(0);
     }
-    if(rolled ==6)printf("You rolled a 6, roll again.\n");
     prev_turn = turn;
-    printf("Waiting for your turn.\n");
-   }
+    if(rolled ==6){
+      printf("You rolled a 6, roll again.\n");
+      memset(buffer, 0, BUFFER_SIZE);
+    }
+    else printf("Waiting for your turn.\n");
+    if(argc == 2){
+      memset(buffer, 0, BUFFER_SIZE);
+      read(server_socket, buffer, sizeof(buffer));
+      if(rolled == 6) special_case = 1;
+      memset(buffer, 0, BUFFER_SIZE);
+    }
+    else{
+      memset(buffer, 0, BUFFER_SIZE);
+    }
+
+  }
 }
