@@ -48,14 +48,12 @@ int main(int argc, char **argv) {
       memset(buffer, 0, BUFFER_SIZE);
       sprintf(buffer, "%d", 0);
       write(players[i], buffer, sizeof(buffer));
-      printf("51 %s\n", buffer);
       close(players[i]);
       continue;
     }
     memset(buffer, 0, BUFFER_SIZE);
     sprintf(buffer, "%d", 1);
     write(players[i], buffer, sizeof(buffer));
-    printf("58 %s\n", buffer);
     memset(buffer, 0, BUFFER_SIZE);
 
     turns[i] = 0;
@@ -78,10 +76,8 @@ int main(int argc, char **argv) {
   int ladder_bot[4] = {41 , 57, 7, 68};
   int ladder_top[4] = {61, 87, 25, 90};
   for (i = 0; i < num_players; i++) {
-    printf("82 %s\n", buffer);
     snprintf(buffer, sizeof(buffer), "You are player #%d. Your token is %s", i, color[i]);
     write(players[i], buffer, sizeof(buffer));
-    printf("85 %s\n", buffer);
   }
 
   memset(buffer, 0, BUFFER_SIZE);
@@ -92,7 +88,6 @@ int main(int argc, char **argv) {
       turns[i] += 1;
       while (turns[i]) {
         write(players[i], ACK, sizeof(ACK));
-        printf("95 %s\n", buffer);
         if(read(players[i], buffer, sizeof(buffer)) == 0){
           printf("Player %d is no longer in the game\n", i);
           exit(0);
@@ -132,7 +127,6 @@ int main(int argc, char **argv) {
                 printf("A player has left the game, server sutting down...\n");
              }
            }
-           printf("136 %s\n", buffer);
         }
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "%d", num_players);
@@ -142,7 +136,6 @@ int main(int argc, char **argv) {
                printf("A player has left the game, server sutting down...\n");
             }
            }
-           printf("146 %s\n", buffer);
         }
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer + strlen(buffer), "%d ", position[0]);
@@ -155,19 +148,16 @@ int main(int argc, char **argv) {
                printf("A player has left the game, server sutting down...\n");
             }
            }
-           printf("159 %s\n", buffer);
         }
         turns[i] -=1;
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "%d", i);
         write(players[i], buffer, sizeof(buffer));
-        printf("165 %s\n", buffer);
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "%s", color[i]);
 
         // ----------
         write(players[i], buffer, sizeof(buffer));
-        printf("171  %s\n", buffer);
         memset(buffer, 0, BUFFER_SIZE);
         sprintf(buffer, "%d", num_players);
         for (j = 0; j < num_players;j++){
@@ -191,7 +181,6 @@ int main(int argc, char **argv) {
           else sprintf(buffer, "You rolled a %d moving to position %d",num_rolled, position[i]);
         }
         write(players[i], buffer, sizeof(buffer));
-        printf("178 %s\n", buffer);
 
 
         int win = find_index(position, num_players, 100);
